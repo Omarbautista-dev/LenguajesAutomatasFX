@@ -79,12 +79,8 @@ public class MenuController {
     @FXML
     private void generarArbol() {
         try {
-            String expresion = txtExpresion.getText().trim();
-
-            if (expresion.isEmpty()) {
-                alerta("Ingresa una expresión.");
-                return;
-            }
+            String expresion = obtenerExpresionValidada();
+            if (expresion == null) return;
 
             String postfija = ConversorInfijaPostfija.convertir(expresion);
             String[] tokens = postfija.trim().split("\\s+");
@@ -107,7 +103,7 @@ public class MenuController {
     private void generarPrefija() {
         try {
             tablaPasos.setItems(FXCollections.observableArrayList(
-                    ConversorInfijaPrefija.convertirConPasos(txtExpresion.getText())
+                    ConversorInfijaPrefija.convertirConPasos(obtenerExpresionValidada())
             ));
         } catch (Exception e) {
             alerta("Error en prefija: " + e.getMessage());
@@ -118,7 +114,7 @@ public class MenuController {
     private void generarInfija() {
         try {
             tablaPasos.setItems(FXCollections.observableArrayList(
-                    ConversorInfija.obtenerPasos(txtExpresion.getText())
+                    ConversorInfija.obtenerPasos(obtenerExpresionValidada())
             ));
         } catch (Exception e) {
             alerta("Error en infija: " + e.getMessage());
@@ -129,7 +125,7 @@ public class MenuController {
     private void generarPostfija() {
         try {
             tablaPasos.setItems(FXCollections.observableArrayList(
-                    ConversorInfijaPostfija.convertirConPasos(txtExpresion.getText())
+                    ConversorInfijaPostfija.convertirConPasos(obtenerExpresionValidada())
             ));
         } catch (Exception e) {
             alerta("Error en postfija: " + e.getMessage());
@@ -592,6 +588,75 @@ public class MenuController {
                 calcularAltura(nodo.izquierda),
                 calcularAltura(nodo.derecha)
         );
+    }
+
+    private String normalizarRaices(String expresion) {
+        expresion = expresion.replaceAll("\\s+", "");
+
+        // Convierte √9 en root(2,9)
+        expresion = expresion.replaceAll("√(-?\\d+(\\.\\d+)?)", "root(2,$1)");
+
+        // Convierte root(9) en root(2,9)
+        expresion = expresion.replaceAll("root\\((-?\\d+(\\.\\d+)?)\\)", "root(2,$1)");
+
+        return expresion;
+    }
+
+    private boolean expresionValida(String expresion) {
+        return expresion.matches("[0-9a-zA-Z+\\-*/^().,√\\s]+") ||
+                expresion.toLowerCase().contains("root");
+    }
+
+    private boolean parentesisBalanceados(String expresion) {
+        int contador = 0;
+
+        for (char c : expresion.toCharArray()) {
+            if (c == '(') contador++;
+            if (c == ')') contador--;
+
+            if (contador < 0) return false;
+        }
+
+        return contador == 0;
+    }
+
+    private boolean contieneDivisionEntreCero(String expresion) {
+        return expresion.matches(".*\\/\\s*0(\\.0+)?(?![0-9]).*");
+    }
+
+    private boolean contieneRaizInvalida(String expresion) {
+        return expresion.matches(".*root\\(\\s*0\\s*,.*");
+    }
+
+    private String obtenerExpresionValidada() {
+        String expresion = txtExpresion.getText().trim();
+
+        if (expresion.isEmpty()) {
+            alerta("Ingresa una expresión.");
+            return null;
+        }
+
+        if (!expresionValida(expresion)) {
+            alerta("La expresión contiene caracteres inválidos.");
+            return null;
+        }
+
+        if (!parentesisBalanceados(expresion)) {
+            alerta("Los paréntesis no están balanceados.");
+            return null;
+        }
+
+        if (contieneDivisionEntreCero(expresion)) {
+            alerta("La expresión contiene una división entre cero.");
+            return null;
+        }
+
+        if (contieneRaizInvalida(expresion)) {
+            alerta("El índice de una raíz no puede ser cero.");
+            return null;
+        }
+
+        return normalizarRaices(expresion);
     }
 
     public record TriploFila(String numero, String operador, String arg1, String arg2) {}

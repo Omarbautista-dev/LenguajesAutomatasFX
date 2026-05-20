@@ -1,109 +1,181 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.example.algoritmos;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-/**
- *
- * @author omard
- */
 public class ConversorInfijaPostfija {
+
     public static String convertir(String expresion) {
-    Stack<Character> pila = new Stack<>();
-    StringBuilder salida = new StringBuilder();
+        Stack<String> pila = new Stack<>();
+        StringBuilder salida = new StringBuilder();
 
-    for (int i = 0; i < expresion.length(); i++) {
-        char c = expresion.charAt(i);
+        List<String> tokens = tokenizar(expresion);
 
-        if (Character.isWhitespace(c)) continue;
+        for (String token : tokens) {
 
-        // 🔥 LA CLAVE: Leer la palabra completa (ej: sqrt) o número (ej: 25)
-        if (Character.isLetterOrDigit(c)) {
-            StringBuilder temp = new StringBuilder();
-            while (i < expresion.length() && Character.isLetterOrDigit(expresion.charAt(i))) {
-                temp.append(expresion.charAt(i));
-                i++;
+            if (esNumero(token) || esVariable(token)) {
+                salida.append(token).append(" ");
             }
-            salida.append(temp).append(" "); // Agrega la palabra completa + espacio
-            i--; // Ajustar el índice
-        } 
-        else if (c == '(') {
-            pila.push(c);
-        } 
-        else if (c == ')') {
-            while (!pila.isEmpty() && pila.peek() != '(') {
-                salida.append(pila.pop()).append(" ");
+
+            else if (token.equals("(")) {
+                pila.push(token);
             }
-            if (!pila.isEmpty()) pila.pop();
-        } 
-        else { // Operadores +, -, *, /, ^
-            while (!pila.isEmpty() && prioridad(pila.peek()) >= prioridad(c)) {
-                salida.append(pila.pop()).append(" ");
+
+            else if (token.equals(")")) {
+                while (!pila.isEmpty() && !pila.peek().equals("(")) {
+                    salida.append(pila.pop()).append(" ");
+                }
+
+                if (!pila.isEmpty()) {
+                    pila.pop();
+                }
             }
-            pila.push(c);
+
+            else if (token.equals(",")) {
+                while (!pila.isEmpty() && !pila.peek().equals("(")) {
+                    salida.append(pila.pop()).append(" ");
+                }
+            }
+
+            else if (esOperador(token)) {
+                while (!pila.isEmpty()
+                        && esOperador(pila.peek())
+                        && prioridad(pila.peek()) >= prioridad(token)) {
+                    salida.append(pila.pop()).append(" ");
+                }
+
+                pila.push(token);
+            }
         }
+
+        while (!pila.isEmpty()) {
+            salida.append(pila.pop()).append(" ");
+        }
+
+        return salida.toString().trim();
     }
 
-    while (!pila.isEmpty()) {
-        salida.append(pila.pop()).append(" ");
-    }
-
-    return salida.toString().trim();
-}
-
-    private static int prioridad(char c) {
-
-if (c == '+' || c == '-') return 1;
-    if (c == '*' || c == '/') return 2;
-    if (c == '^') return 3; // Potencia debe ser mayor
-    return 0;
-    }
-    
-    
     public static List<PasoConversion> convertirConPasos(String expresion) {
+        Stack<String> pila = new Stack<>();
+        List<PasoConversion> pasos = new ArrayList<>();
+        StringBuilder salida = new StringBuilder();
 
-    Stack<Character> pila = new Stack<>();
-    List<PasoConversion> pasos = new ArrayList<>();
-    String salida = "";
+        List<String> tokens = tokenizar(expresion);
 
-    for (char c : expresion.toCharArray()) {
+        for (String token : tokens) {
 
-        if (Character.isLetterOrDigit(c)) {
-            salida += c + " ";
-        } 
-        else if (c == '(') {
-            pila.push(c);
-        } 
-        else if (c == ')') {
-            while (!pila.isEmpty() && pila.peek() != '(') {
-                salida += pila.pop() + " ";
+            if (esNumero(token) || esVariable(token)) {
+                salida.append(token).append(" ");
             }
-            pila.pop();
-        } 
-        else {
-            while (!pila.isEmpty() && prioridad(pila.peek()) >= prioridad(c)) {
-                salida += pila.pop() + " ";
+
+            else if (token.equals("(")) {
+                pila.push(token);
             }
-            pila.push(c);
+
+            else if (token.equals(")")) {
+                while (!pila.isEmpty() && !pila.peek().equals("(")) {
+                    salida.append(pila.pop()).append(" ");
+                }
+
+                if (!pila.isEmpty()) {
+                    pila.pop();
+                }
+            }
+
+            else if (token.equals(",")) {
+                while (!pila.isEmpty() && !pila.peek().equals("(")) {
+                    salida.append(pila.pop()).append(" ");
+                }
+            }
+
+            else if (esOperador(token)) {
+                while (!pila.isEmpty()
+                        && esOperador(pila.peek())
+                        && prioridad(pila.peek()) >= prioridad(token)) {
+                    salida.append(pila.pop()).append(" ");
+                }
+
+                pila.push(token);
+            }
+
+            pasos.add(new PasoConversion(
+                    token,
+                    pila.toString(),
+                    salida.toString()
+            ));
         }
 
-        pasos.add(new PasoConversion(
-            String.valueOf(c),
-            pila.toString(),
-            salida
-        ));
+        while (!pila.isEmpty()) {
+            salida.append(pila.pop()).append(" ");
+            pasos.add(new PasoConversion("pop", pila.toString(), salida.toString()));
+        }
+
+        return pasos;
     }
 
-    while (!pila.isEmpty()) {
-        salida += pila.pop() + " ";
-        pasos.add(new PasoConversion("pop", pila.toString(), salida));
+    private static List<String> tokenizar(String expresion) {
+        List<String> tokens = new ArrayList<>();
+
+        for (int i = 0; i < expresion.length(); i++) {
+            char c = expresion.charAt(i);
+
+            if (Character.isWhitespace(c)) {
+                continue;
+            }
+
+            if (Character.isDigit(c) || c == '.') {
+                StringBuilder numero = new StringBuilder();
+
+                while (i < expresion.length()
+                        && (Character.isDigit(expresion.charAt(i)) || expresion.charAt(i) == '.')) {
+                    numero.append(expresion.charAt(i));
+                    i++;
+                }
+
+                tokens.add(numero.toString());
+                i--;
+            }
+
+            else if (Character.isLetter(c)) {
+                StringBuilder palabra = new StringBuilder();
+
+                while (i < expresion.length() && Character.isLetter(expresion.charAt(i))) {
+                    palabra.append(expresion.charAt(i));
+                    i++;
+                }
+
+                tokens.add(palabra.toString());
+                i--;
+            }
+
+            else if ("+-*/^(),√".indexOf(c) >= 0) {
+                tokens.add(String.valueOf(c));
+            }
+        }
+
+        return tokens;
     }
 
-    return pasos;
-}
+    private static boolean esNumero(String token) {
+        return token.matches("-?\\d+(\\.\\d+)?");
+    }
+
+    private static boolean esVariable(String token) {
+        return token.matches("[a-zA-Z]");
+    }
+
+    private static boolean esOperador(String token) {
+        return token.matches("[+\\-*/^√]") || token.equalsIgnoreCase("root");
+    }
+
+    private static int prioridad(String op) {
+        return switch (op) {
+            case "root", "√" -> 4;
+            case "^" -> 3;
+            case "*", "/" -> 2;
+            case "+", "-" -> 1;
+            default -> 0;
+        };
+    }
 }
