@@ -202,17 +202,37 @@ public class MenuController {
     @FXML
     private void abrirArbolAExpresion() {
         try {
+
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/org/example/views/arbol_a_expresion.fxml")
             );
 
-            Stage stage = new Stage();
-            stage.setTitle("Árbol a Expresión");
-            stage.setScene(new Scene(loader.load(), 1200, 720));
-            stage.show();
+            Scene scene = new Scene(loader.load(), 1200, 720);
+
+            scene.getStylesheets().add(
+                    getClass().getResource("/org/example/css/styles.css").toExternalForm()
+            );
+
+            Stage ventanaActual = (Stage) txtExpresion.getScene().getWindow();
+
+            Stage nuevaVentana = new Stage();
+            nuevaVentana.setTitle("Árbol a Expresión");
+            nuevaVentana.setScene(scene);
+
+            nuevaVentana.setMinWidth(1000);
+            nuevaVentana.setMinHeight(650);
+
+            // ocultar menú principal
+            ventanaActual.hide();
+
+            // cuando cierre la ventana secundaria
+            // vuelve a mostrar el menú
+            nuevaVentana.setOnHidden(event -> ventanaActual.show());
+
+            nuevaVentana.show();
 
         } catch (Exception e) {
-            alerta("Todavía falta crear la pantalla Árbol a Expresión.");
+            alerta("Error al abrir Árbol a Expresión: " + e.getMessage());
         }
     }
 

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.controller.ArbolAExpresionController"
+            styleClass="root">
+
+    <left>
+        <VBox spacing="14" prefWidth="330" styleClass="panel">
+
+            <Label text="Genera tu árbol de expresión" styleClass="section-title"/>
+
+            <Label text="Valor del nodo raíz"/>
+            <TextField fx:id="txtRaiz"/>
+            <Button text="Generar nodo raíz" onAction="#generarRaiz"/>
+
+            <Separator/>
+
+            <Label text="Valores para los nodos hijos"/>
+
+            <HBox spacing="8">
+                <VBox spacing="5">
+                    <Label text="Izquierdo"/>
+                    <TextField fx:id="txtIzquierdo" prefWidth="120"/>
+                </VBox>
+
+                <VBox spacing="5">
+                    <Label text="Derecho"/>
+                    <TextField fx:id="txtDerecho" prefWidth="120"/>
+                </VBox>
+            </HBox>
+
+            <Button text="Generar nodos hijos" onAction="#generarHijos"/>
+
+            <Separator/>
+
+            <Label text="¿De qué lado quieres trabajar?"/>
+
+            <HBox spacing="8">
+                <Button text="Izquierda" onAction="#irIzquierda"/>
+                <Button text="Derecha" onAction="#irDerecha"/>
+            </HBox>
+
+            <Button text="Regresar nodo" onAction="#regresarNodo"/>
+
+            <Separator/>
+
+            <Button text="Generar Expresión" onAction="#generarExpresion"/>
+            <TextArea fx:id="txtExpresionGenerada"
+                      editable="false"
+                      prefHeight="90"
+                      promptText="Aquí aparecerá la expresión..."/>
+
+            <HBox spacing="8">
+                <Button text="Borrar" onAction="#borrar"/>
+                <Button text="Regresar Menú" onAction="#regresarMenu"/>
+            </HBox>
+
+            <Label fx:id="lblNodoActual"
+                   text="Nodo actual: ninguno"
+                   styleClass="status-label"/>
+
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="8" styleClass="panel">
+            <Label text="Vista del árbol" styleClass="section-title"/>
+
+            <ScrollPane fitToHeight="true"
+                        fitToWidth="false"
+                        pannable="true"
+                        VBox.vgrow="ALWAYS">
+                <content>
+                    <Pane fx:id="panelArbol"
+                          prefWidth="900"
+                          prefHeight="650"
+                          styleClass="draw-panel"/>
+                </content>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+</BorderPane>
