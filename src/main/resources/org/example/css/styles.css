@@ -1,0 +1,49 @@
+.root {
+    -fx-background-color: #cddddd;
+    -fx-font-family: "Dialog", Arial, sans-serif;
+}
+
+.main-container {
+    -fx-padding: 8;
+    -fx-background-color: #cddddd;
+}
+
+.panel {
+    -fx-background-color: #acbdba;
+    -fx-padding: 10;
+}
+
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #351431;
+}
+
+.button {
+    -fx-background-color: #cddddd;
+    -fx-border-color: #888;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #e4eeee;
+}
+
+.text-field {
+    -fx-background-color: #cddddd;
+    -fx-border-color: #888;
+}
+
+.draw-panel {
+    -fx-background-color: #cddddd;
+    -fx-border-color: #8a9a9a;
+}
+
+.pila-panel {
+    -fx-background-color: #263238;
+    -fx-border-color: #8a9a9a;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+}

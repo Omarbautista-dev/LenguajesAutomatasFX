@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.controller.MenuController"
+            styleClass="root">
+
+    <center>
+        <HBox spacing="10" styleClass="main-container">
+
+            <VBox spacing="10" styleClass="panel" prefWidth="720">
+                <Label text="NOTACIONES" styleClass="section-title"/>
+
+                <HBox spacing="8">
+                    <Label text="Ingrese su expresión"/>
+                    <TextField fx:id="txtExpresion" HBox.hgrow="ALWAYS"/>
+                    <Button text="Generar árbol" onAction="#generarArbol"/>
+                    <Button text="Borrar" onAction="#borrar"/>
+                </HBox>
+
+                <HBox spacing="8">
+                    <Button text="Prefija" onAction="#generarPrefija"/>
+                    <Button text="Infija" onAction="#generarInfija"/>
+                    <Button text="Postfija" onAction="#generarPostfija"/>
+                    <Button text="Polaca" onAction="#generarPolaca"/>
+                    <Button text="Árbol a expresión" onAction="#abrirArbolAExpresion"/>
+                </HBox>
+
+                <ScrollPane fx:id="scrollArbol"
+                            fitToHeight="true"
+                            fitToWidth="false"
+                            pannable="true"
+                            prefHeight="520"
+                            VBox.vgrow="ALWAYS">
+                    <content>
+                        <Pane fx:id="panelArbol"
+                              prefWidth="700"
+                              prefHeight="500"
+                              styleClass="draw-panel"/>
+                    </content>
+                </ScrollPane>
+
+                <TableView fx:id="tablaPasos" prefHeight="180">
+                    <columns>
+                        <TableColumn fx:id="colToken" text="Token"/>
+                        <TableColumn fx:id="colPila" text="Pila"/>
+                        <TableColumn fx:id="colSalida" text="Salida"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox spacing="10" styleClass="panel" prefWidth="500">
+                <Label text="Código P" styleClass="section-title"/>
+                <Button text="Generar Código P" onAction="#generarCodigoP"/>
+
+                <HBox spacing="8" prefHeight="330">
+
+                    <VBox spacing="5" prefWidth="245">
+                        <Label text="Instrucciones"/>
+                        <ListView fx:id="listaCodigoP" prefHeight="125"/>
+
+                        <ScrollPane fitToWidth="true"
+                                    fitToHeight="false"
+                                    pannable="true"
+                                    VBox.vgrow="ALWAYS">
+                            <content>
+                                <Pane fx:id="panelInstruccionesCodigoP"
+                                      prefWidth="220"
+                                      prefHeight="360"
+                                      styleClass="pila-panel"/>
+                            </content>
+                        </ScrollPane>
+                    </VBox>
+
+                    <VBox spacing="5" prefWidth="220">
+                        <Label text="Pila de datos"/>
+                        <ScrollPane fitToWidth="true"
+                                    fitToHeight="false"
+                                    pannable="true"
+                                    VBox.vgrow="ALWAYS">
+                            <content>
+                                <Pane fx:id="panelPilaDatosCodigoP"
+                                      prefWidth="200"
+                                      prefHeight="360"
+                                      styleClass="pila-panel"/>
+                            </content>
+                        </ScrollPane>
+                    </VBox>
+
+                </HBox>
+
+                <Label text="Triplos y Cuádruplos" styleClass="section-title"/>
+
+                <HBox spacing="8">
+                    <Button text="Generar Cuádruplos" onAction="#generarCuadruplos"/>
+                    <Button text="Generar Triplos" onAction="#generarTriplos"/>
+                </HBox>
+
+                <TabPane VBox.vgrow="ALWAYS">
+                    <Tab text="Cuádruplos" closable="false">
+                        <TableView fx:id="tablaCuadruplos">
+                            <columns>
+                                <TableColumn fx:id="colCuadOperador" text="Operador"/>
+                                <TableColumn fx:id="colCuadArg1" text="Arg1"/>
+                                <TableColumn fx:id="colCuadArg2" text="Arg2"/>
+                                <TableColumn fx:id="colCuadResultado" text="Resultado"/>
+                            </columns>
+                        </TableView>
+                    </Tab>
+
+                    <Tab text="Triplos" closable="false">
+                        <TableView fx:id="tablaTriplos">
+                            <columns>
+                                <TableColumn fx:id="colTripNumero" text="#"/>
+                                <TableColumn fx:id="colTripOperador" text="Operador"/>
+                                <TableColumn fx:id="colTripArg1" text="Arg1"/>
+                                <TableColumn fx:id="colTripArg2" text="Arg2"/>
+                            </columns>
+                        </TableView>
+                    </Tab>
+                </TabPane>
+            </VBox>
+
+            <VBox spacing="10" styleClass="panel" prefWidth="360">
+                <Label text="Conteo de Programa" styleClass="section-title"/>
+                <TableView fx:id="tablaConteo" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colCategoria" text="Categoría"/>
+                        <TableColumn fx:id="colTipo" text="Tipo"/>
+                        <TableColumn fx:id="colCantidad" text="Cantidad"/>
+                    </columns>
+                </TableView>
+
+                <Button text="Contar Datos" onAction="#contarDatos"/>
+            </VBox>
+
+        </HBox>
+    </center>
+
+</BorderPane>
