@@ -50,8 +50,9 @@
             <Button text="Generar Expresión" onAction="#generarExpresion"/>
             <TextArea fx:id="txtExpresionGenerada"
                       editable="false"
-                      prefHeight="90"
-                      promptText="Aquí aparecerá la expresión..."/>
+                      prefHeight="170"
+                      wrapText="true"
+                      promptText="Aquí aparecerá la expresión, resolución y resultado..."/>
 
             <HBox spacing="8">
                 <Button text="Borrar" onAction="#borrar"/>

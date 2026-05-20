@@ -7,6 +7,9 @@ public class NodoManual {
     public NodoManual derecho;
     public NodoManual padre;
 
+    public double x;
+    public double y;
+
     public NodoManual(String valor) {
         this.valor = valor;
     }

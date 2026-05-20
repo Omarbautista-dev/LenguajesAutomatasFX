@@ -46,6 +46,11 @@ public class ArbolAExpresionController {
             return;
         }
 
+        if (esNumero(nodoActual.valor)) {
+            alerta("No puedes crear nodos hijos en un número. Los números deben ser hojas del árbol.");
+            return;
+        }
+
         String izq = txtIzquierdo.getText().trim();
         String der = txtDerecho.getText().trim();
 
@@ -137,8 +142,24 @@ public class ArbolAExpresionController {
             return;
         }
 
+        if (!arbolValido(raiz)) {
+            alerta("El árbol no está completo. Los operadores deben tener hijo izquierdo y derecho.");
+            return;
+        }
+
         String expresion = generarInfija(raiz);
-        txtExpresionGenerada.setText(expresion);
+
+        StringBuilder pasos = new StringBuilder();
+        double resultado = evaluarConPasos(raiz, pasos);
+
+        txtExpresionGenerada.setText(
+                "Expresión generada:\n" +
+                        expresion +
+                        "\n\nResolución paso a paso:\n" +
+                        pasos +
+                        "\nResultado final:\n" +
+                        resultado
+        );
     }
 
     @FXML
@@ -187,64 +208,67 @@ public class ArbolAExpresionController {
         }
     }
 
+    private int contadorX;
+
     private void dibujarArbol() {
         panelArbol.getChildren().clear();
 
         if (raiz == null) return;
 
-        int hojas = contarHojas(raiz);
+        int hojas = Math.max(1, contarHojas(raiz));
         int altura = calcularAltura(raiz);
 
-        double ancho = Math.max(900, hojas * 95);
-        double alto = Math.max(650, altura * 100);
+        double ancho = Math.max(900, hojas * 130);
+        double alto = Math.max(650, altura * 120);
 
         panelArbol.setPrefWidth(ancho);
+        panelArbol.setMinWidth(ancho);
         panelArbol.setPrefHeight(alto);
+        panelArbol.setMinHeight(alto);
 
-        dibujarNodo(raiz, ancho / 2, 60, Math.max(90, Math.min(200, ancho / 4)));
+        contadorX = 0;
+        asignarPosiciones(raiz, 0);
+
+        dibujarConPosiciones(raiz);
     }
 
-    private void dibujarNodo(NodoManual nodo, double x, double y, double separacion) {
+    private void asignarPosiciones(NodoManual nodo, int nivel) {
         if (nodo == null) return;
 
-        double nuevaSeparacion = Math.max(separacion / 1.7, 50);
+        asignarPosiciones(nodo.izquierdo, nivel + 1);
+
+        nodo.x = 80 + contadorX * 130;
+        nodo.y = 70 + nivel * 120;
+        contadorX++;
+
+        asignarPosiciones(nodo.derecho, nivel + 1);
+    }
+
+    private void dibujarConPosiciones(NodoManual nodo) {
+        if (nodo == null) return;
 
         if (nodo.izquierdo != null) {
-            double xIzq = x - separacion;
-            double yIzq = y + 90;
-
-            Line linea = new Line(x, y, xIzq, yIzq);
+            Line linea = new Line(nodo.x, nodo.y, nodo.izquierdo.x, nodo.izquierdo.y);
             linea.setStroke(Color.web("#351431"));
-
             panelArbol.getChildren().add(linea);
-            dibujarNodo(nodo.izquierdo, xIzq, yIzq, nuevaSeparacion);
+            dibujarConPosiciones(nodo.izquierdo);
         }
 
         if (nodo.derecho != null) {
-            double xDer = x + separacion;
-            double yDer = y + 90;
-
-            Line linea = new Line(x, y, xDer, yDer);
+            Line linea = new Line(nodo.x, nodo.y, nodo.derecho.x, nodo.derecho.y);
             linea.setStroke(Color.web("#351431"));
-
             panelArbol.getChildren().add(linea);
-            dibujarNodo(nodo.derecho, xDer, yDer, nuevaSeparacion);
+            dibujarConPosiciones(nodo.derecho);
         }
 
-        Circle circulo = new Circle(x, y, nodo == nodoActual ? 22 : 18);
-
-        if (nodo == nodoActual) {
-            circulo.setFill(Color.web("#facc15"));
-        } else {
-            circulo.setFill(Color.web("#cddddd"));
-        }
-
+        Circle circulo = new Circle(nodo.x, nodo.y, nodo == nodoActual ? 23 : 19);
+        circulo.setFill(nodo == nodoActual ? Color.web("#facc15") : Color.web("#cddddd"));
         circulo.setStroke(Color.web("#351431"));
         circulo.setStrokeWidth(1.5);
 
         Label texto = new Label(nodo.valor);
-        texto.setLayoutX(x - 6);
-        texto.setLayoutY(y - 10);
+        texto.setLayoutX(nodo.x - 7);
+        texto.setLayoutY(nodo.y - 10);
 
         panelArbol.getChildren().addAll(circulo, texto);
     }
@@ -275,4 +299,63 @@ public class ArbolAExpresionController {
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
+
+    private boolean esNumero(String valor) {
+        return valor.matches("-?\\d+(\\.\\d+)?");
+    }
+
+    private boolean arbolValido(NodoManual nodo) {
+        if (nodo == null) return true;
+
+        if (esNumero(nodo.valor)) {
+            return nodo.izquierdo == null && nodo.derecho == null;
+        }
+
+        if (esOperador(nodo.valor)) {
+            return nodo.izquierdo != null &&
+                    nodo.derecho != null &&
+                    arbolValido(nodo.izquierdo) &&
+                    arbolValido(nodo.derecho);
+        }
+
+        return nodo.esHoja();
+    }
+
+    private boolean esOperador(String valor) {
+        return valor.matches("[+\\-*/^]");
+    }
+
+    private double evaluarConPasos(NodoManual nodo, StringBuilder pasos) {
+        if (nodo == null) return 0;
+
+        if (esNumero(nodo.valor)) {
+            return Double.parseDouble(nodo.valor);
+        }
+
+        double izquierda = evaluarConPasos(nodo.izquierdo, pasos);
+        double derecha = evaluarConPasos(nodo.derecho, pasos);
+
+        double resultado;
+
+        switch (nodo.valor) {
+            case "+" -> resultado = izquierda + derecha;
+            case "-" -> resultado = izquierda - derecha;
+            case "*" -> resultado = izquierda * derecha;
+            case "/" -> resultado = izquierda / derecha;
+            case "^" -> resultado = Math.pow(izquierda, derecha);
+            default -> throw new IllegalArgumentException("Operador no válido: " + nodo.valor);
+        }
+
+        pasos.append(izquierda)
+                .append(" ")
+                .append(nodo.valor)
+                .append(" ")
+                .append(derecha)
+                .append(" = ")
+                .append(resultado)
+                .append("\n");
+
+        return resultado;
+    }
+
 }
