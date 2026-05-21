@@ -268,22 +268,52 @@ public class MenuController {
         String[][] categorias = {
                 {"Clases", "Clase Concreta"},
                 {"Clases", "Clase Abstracta"},
+                {"Clases", "Clase Estática"},
                 {"Clases", "Interfaz"},
+                {"Clases", "Clase Interna"},
+
                 {"Variables", "Locales"},
+                {"Variables", "Instancia (Atributos)"},
+                {"Variables", "Clase (Estáticas)"},
+                {"Variables", "Parámetros"},
+
+                {"Constantes", "Literales"},
                 {"Constantes", "Simbólicas (final)"},
+                {"Constantes", "Enums"},
+
                 {"Expresiones", "Aritméticas"},
                 {"Expresiones", "Relacionales"},
                 {"Expresiones", "Lógicas"},
+                {"Expresiones", "De Asignación"},
+
                 {"Asignaciones", "Simple (=)"},
                 {"Asignaciones", "Compuesta (+=, etc)"},
+
+                {"Control", "Secuenciales"},
+                {"Control", "Selectivas"},
+                {"Control", "Iterativas"},
+                {"Control", "Selección (if/else)"},
+                {"Control", "Múltiple (switch)"},
+
                 {"Decisión", "Simple (if)"},
                 {"Decisión", "Doble (if-else)"},
                 {"Decisión", "Múltiple (switch)"},
+                {"Decisión", "Anidada"},
+
                 {"Iterativas", "Ciclo for"},
                 {"Iterativas", "Ciclo while"},
                 {"Iterativas", "Ciclo do-while"},
+                {"Iterativas", "for-each (mejorado)"},
+
+                {"Funciones", "Con Retorno"},
                 {"Funciones", "Vacío (void)"},
-                {"Funciones", "Con Retorno"}
+                {"Funciones", "Con Parámetros"},
+                {"Funciones", "Recursivas"},
+                {"Funciones", "Lambdas"},
+
+                {"Estructuras", "Lineales (Pila/Cola)"},
+                {"Estructuras", "No Lineales (Arbol)"},
+                {"Estructuras", "Asociativas (Map)"}
         };
 
         for (String[] c : categorias) {
@@ -291,6 +321,11 @@ public class MenuController {
         }
 
         File src = new File("src/main/java");
+
+        if (!src.exists()) {
+            src = new File("src");
+        }
+
         recorrerArchivos(src, conteos);
 
         List<ConteoFila> filas = new ArrayList<>();
@@ -325,36 +360,129 @@ public class MenuController {
                 analizarLinea(linea.trim(), conteos);
             }
 
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("Error al leer: " + archivo.getName());
         }
     }
 
     private void analizarLinea(String linea, Map<String, Integer> conteos) {
-        if (linea.startsWith("//") || linea.startsWith("*")) return;
+        if (linea.isEmpty()) return;
+        if (linea.startsWith("//") || linea.startsWith("*") || linea.startsWith("/*")) return;
 
+        // Clases
         if (linea.contains("abstract class")) inc(conteos, "Clases", "Clase Abstracta");
+        else if (linea.contains("static class")) inc(conteos, "Clases", "Clase Estática");
         else if (linea.contains("interface ")) inc(conteos, "Clases", "Interfaz");
         else if (linea.contains("class ")) inc(conteos, "Clases", "Clase Concreta");
 
+        if (linea.matches(".*class\\s+\\w+.*\\{.*class\\s+\\w+.*")) {
+            inc(conteos, "Clases", "Clase Interna");
+        }
+
+        // Variables
+        if (linea.matches(".*\\b(private|public|protected)\\b.*\\b(int|double|float|String|boolean|char|long|short|byte|List|Map|ArrayList|Stack)\\b.*;")) {
+            inc(conteos, "Variables", "Instancia (Atributos)");
+        }
+
+        if (linea.matches(".*\\bstatic\\b.*\\b(int|double|float|String|boolean|char|long|short|byte|List|Map|ArrayList|Stack)\\b.*;")) {
+            inc(conteos, "Variables", "Clase (Estáticas)");
+        }
+
+        if (linea.matches(".*\\b(int|double|float|String|boolean|char|long|short|byte|var|List|Map|ArrayList|Stack)\\b\\s+\\w+.*;")) {
+            inc(conteos, "Variables", "Locales");
+        }
+
+        if (linea.matches(".*\\(.*\\b(int|double|float|String|boolean|char|long|short|byte|List|Map|ArrayList|Stack)\\b\\s+\\w+.*\\).*")) {
+            inc(conteos, "Variables", "Parámetros");
+        }
+
+        // Constantes
         if (linea.contains("final ")) inc(conteos, "Constantes", "Simbólicas (final)");
+        if (linea.matches(".*\".*\".*") || linea.matches(".*\\b\\d+\\b.*")) inc(conteos, "Constantes", "Literales");
+        if (linea.matches(".*\\benum\\b.*")) inc(conteos, "Constantes", "Enums");
+
+        // Expresiones
         if (linea.matches(".*[+\\-*/%].*")) inc(conteos, "Expresiones", "Aritméticas");
         if (linea.matches(".*(==|!=|<=|>=|<|>).*")) inc(conteos, "Expresiones", "Relacionales");
         if (linea.matches(".*(&&|\\|\\||!).*")) inc(conteos, "Expresiones", "Lógicas");
+        if (linea.matches(".*(?<![+\\-*/!<>=])=(?![=]).*")) inc(conteos, "Expresiones", "De Asignación");
 
+        // Asignaciones
         if (linea.matches(".*(?<![+\\-*/!<>=])=(?![=]).*")) inc(conteos, "Asignaciones", "Simple (=)");
         if (linea.matches(".*(\\+=|\\-=|\\*=|/=|%=).*")) inc(conteos, "Asignaciones", "Compuesta (+=, etc)");
 
-        if (linea.matches(".*\\bif\\b.*")) inc(conteos, "Decisión", "Simple (if)");
-        if (linea.matches(".*\\belse\\b.*")) inc(conteos, "Decisión", "Doble (if-else)");
-        if (linea.matches(".*\\bswitch\\b.*")) inc(conteos, "Decisión", "Múltiple (switch)");
+        // Decisión y control
+        if (linea.matches(".*\\bif\\b.*")) {
+            inc(conteos, "Decisión", "Simple (if)");
+            inc(conteos, "Control", "Selectivas");
+            inc(conteos, "Control", "Selección (if/else)");
+        }
 
-        if (linea.matches(".*\\bfor\\s*\\(.*\\).*")) inc(conteos, "Iterativas", "Ciclo for");
-        if (linea.matches(".*\\bwhile\\s*\\(.*\\).*")) inc(conteos, "Iterativas", "Ciclo while");
-        if (linea.matches(".*\\bdo\\b.*")) inc(conteos, "Iterativas", "Ciclo do-while");
+        if (linea.matches(".*\\belse\\b.*")) {
+            inc(conteos, "Decisión", "Doble (if-else)");
+        }
 
-        if (linea.matches(".*\\bvoid\\b.*\\(.*\\).*")) inc(conteos, "Funciones", "Vacío (void)");
-        if (linea.matches(".*(public|private|protected).*\\(.*\\).*") && !linea.contains("void")) {
+        if (linea.matches(".*\\bif\\b.*\\bif\\b.*")) {
+            inc(conteos, "Decisión", "Anidada");
+        }
+
+        if (linea.matches(".*\\bswitch\\b.*")) {
+            inc(conteos, "Decisión", "Múltiple (switch)");
+            inc(conteos, "Control", "Múltiple (switch)");
+        }
+
+        // Iterativas
+        if (linea.matches(".*\\b(for|while|do)\\b.*")) {
+            inc(conteos, "Control", "Iterativas");
+        }
+
+        if (linea.matches(".*\\bfor\\s*\\(.*:.*\\).*")) {
+            inc(conteos, "Iterativas", "for-each (mejorado)");
+        } else if (linea.matches(".*\\bfor\\s*\\(.*\\).*")) {
+            inc(conteos, "Iterativas", "Ciclo for");
+        }
+
+        if (linea.matches(".*\\bwhile\\s*\\(.*\\).*")) {
+            inc(conteos, "Iterativas", "Ciclo while");
+        }
+
+        if (linea.matches(".*\\bdo\\b.*")) {
+            inc(conteos, "Iterativas", "Ciclo do-while");
+        }
+
+        // Funciones
+        if (linea.matches(".*\\bvoid\\b\\s+\\w+\\s*\\(.*\\).*")) {
+            inc(conteos, "Funciones", "Vacío (void)");
+        }
+
+        if (linea.matches(".*\\b(public|private|protected)\\b.*\\w+\\s+\\w+\\s*\\(.*\\).*") && !linea.contains(" void ")) {
             inc(conteos, "Funciones", "Con Retorno");
+        }
+
+        if (linea.matches(".*\\w+\\s+\\w+\\s*\\(.+\\).*")) {
+            inc(conteos, "Funciones", "Con Parámetros");
+        }
+
+        if (linea.matches(".*->.*")) {
+            inc(conteos, "Funciones", "Lambdas");
+        }
+
+        // Estructuras
+        if (linea.matches(".*\\b(Stack|Queue|Deque|List|ArrayList|LinkedList)\\b.*")) {
+            inc(conteos, "Estructuras", "Lineales (Pila/Cola)");
+        }
+
+        if (linea.matches(".*\\b(Tree|Nodo|Arbol|BinaryTree)\\b.*")) {
+            inc(conteos, "Estructuras", "No Lineales (Arbol)");
+        }
+
+        if (linea.matches(".*\\b(Map|HashMap|LinkedHashMap|TreeMap)\\b.*")) {
+            inc(conteos, "Estructuras", "Asociativas (Map)");
+        }
+
+        // Secuenciales
+        if (linea.endsWith(";")) {
+            inc(conteos, "Control", "Secuenciales");
         }
     }
 
