@@ -1,13 +1,14 @@
 package org.example.algoritmos;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 public class ConversorInfijaPostfija {
 
     public static String convertir(String expresion) {
-        Stack<String> pila = new Stack<>();
+        Deque<String> pila = new ArrayDeque<>();
         StringBuilder salida = new StringBuilder();
 
         List<String> tokens = tokenizar(expresion);
@@ -57,7 +58,7 @@ public class ConversorInfijaPostfija {
     }
 
     public static List<PasoConversion> convertirConPasos(String expresion) {
-        Stack<String> pila = new Stack<>();
+        Deque<String> pila = new ArrayDeque<>();
         List<PasoConversion> pasos = new ArrayList<>();
         StringBuilder salida = new StringBuilder();
 

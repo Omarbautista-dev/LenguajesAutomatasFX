@@ -1,12 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package org.example.algoritmos;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
+
 /**
  *
  * @author omard
@@ -32,7 +31,7 @@ public class ConversorInfijaPrefija {
             else invertida.append(c);
         }
 
-        Stack<String> pila = new Stack<>();
+        Deque<String> pila = new ArrayDeque<>();
         List<PasoConversion> pasos = new ArrayList<>();
         StringBuilder salida = new StringBuilder();
         String expInvertida = invertida.toString();
