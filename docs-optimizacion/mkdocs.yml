@@ -1,0 +1,22 @@
+site_name: Optimización de Código - LenguajesAutomatasFX
+site_description: Documentación de optimización usando SonarQube for IDE, VisualVM e IntelliJ IDEA
+site_author: Omar Bautista
+
+theme:
+  name: material
+  language: es
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Inicio: index.md
+  - Proyecto: proyecto.md
+  - Herramientas utilizadas: herramientas.md
+  - Código sin optimizar: codigo-sin-optimizar.md
+  - Análisis realizado: analisis.md
+  - Código optimizado: codigo-optimizado.md.md
+  - Comparativa: comparativa.md
+  - Conclusión: conclusion.md
